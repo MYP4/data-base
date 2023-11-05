@@ -188,11 +188,11 @@ SELECT
 	ct."name",
 	to_char(rp.start_date_and_time, 'YYYY MONTH') AS start_date,
 	to_char(rp.start_date_and_time, 'HH24:MI:SS') AS start_time,
-	to_char(rp.end_date_and_time, 'YYYY MONTH') AS END_date,
-	to_char(rp.end_date_and_time, 'HH24:MI:SS') AS END_time,
+	to_char(rp.end_date_and_time, 'YYYY MONTH') AS end_date,
+	to_char(rp.end_date_and_time, 'HH24:MI:SS') AS end_time,
 	pa."name",
 	pa.capacity,
-	r.cost_per_HOUR 
+	r.cost_per_hour 
 FROM car c
 LEFT JOIN car_model cm ON c.car_model_id = cm.car_model_id
 LEFT JOIN car_type ct ON cm.car_type_id = ct.car_type_id
@@ -250,17 +250,29 @@ WHERE (SELECT count(rp.car_id) > 3 FROM rent_place rp);
 '23.Выбрать номер транспортного средства, которое въезжало на парковку
 несколько раз за один день.'
 
-select c.car_number 
+select c.car_number
 from rent_place rp 
-left join car c 
-where 
+left join car c on rp.car_id = c.car_id
+group by c.car_number, to_char(rp.start_date_and_time, 'YYYY-MONTH-DD')
+having count(rp.start_date_and_time) > 1 
 
 
 '24.Выбрать номер транспортного средства, которое въезжало на парковку
 несколько раз за один день, но всегда в одну и ту же зону парковки.
 Результат отсортировать по убыванию.'
 
-
+select car_number, count(parking_area_id), dt, cnt
+from (
+	select c.car_number, to_char(rp.start_date_and_time, 'YYYY-MONTH-DD') as dt, rp.parking_area_id, count(*) as cnt
+	from rent_place rp 
+	left join car c on rp.car_id = c.car_id
+	group by c.car_number, to_char(rp.start_date_and_time, 'YYYY-MONTH-DD'), rp.parking_area_id 
+) data
+group by 
+	car_number, dt, cnt
+--having count(to_char(rp.start_date_and_time, 'YYYY-MONTH-DD')) > 1 
+--   and count(parking_area_id) = count(rp.start_date_and_time)
+order by car_number desc 
 
 
 '25.Выбрать все данные типа, транспортные средства которого въезжали на
