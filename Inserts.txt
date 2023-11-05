@@ -1,0 +1,453 @@
+
+'Заполнение таблицы region'
+insert into region(name) values('Воронежская область');
+insert into region(name) values('Московская область');
+
+'Заполнение таблицы city'
+insert into city(region_id, name) values((select region_id from region where name = 'Воронежская область'), 'Воронеж');
+insert into city(region_id, name) values((select region_id from region where name = 'Воронежская область'), 'Борисоглебск');
+insert into city(region_id, name) values((select region_id from region where name = 'Московская область'), 'Москва');
+
+'Заполнение таблицы parking_area'
+insert into parking_area(city_id, code, capacity) values((select city_id from city where name = 'Воронеж'), 3605, 10);
+insert into parking_area(city_id, code, capacity) values((select city_id from city where name = 'Воронеж'), 3603, 15);
+insert into parking_area(city_id, code, capacity) values((select city_id from city where name = 'Воронеж'), 3602, 12);
+insert into parking_area(city_id, code, capacity) values((select city_id from city where name = 'Воронеж'), 3601, 10);
+insert into parking_area(city_id, code, capacity) values((select city_id from city where name = 'Воронеж'), 3606, 15);
+insert into parking_area(city_id, code, capacity) values((select city_id from city where name = 'Воронеж'), 3601, 10);
+insert into parking_area(city_id, code, capacity) values((select city_id from city where name = 'Воронеж'), 3606, 15);
+
+'Заполнение таблицы car_brand'
+insert into car_brand(name) values('Lada');
+insert into car_brand(name) values('Ford');
+insert into car_brand(name) values('Chery');
+insert into car_brand(name) values('Volkswagen');
+
+'Заполнение таблицы car_type'
+insert into car_type(name) values('Грузовой автомобиль');
+insert into car_type(name) values('Легковой автомобиль');
+insert into car_type(name) values('Служебный автомобиль');
+insert into car_type(name) values('Такси');
+
+
+'Заполнение таблицы car_model'
+insert into car_model(car_brand_id, car_type_id, name) values(
+	(select car_model_id from car_model cm where car_model_id = 1),
+	(select car_type_id from car_type ct where car_type_id = 2),
+	'Vesta');
+
+insert into car_model(car_brand_id, car_type_id, name) values(
+	(select car_model_id from car_model cm where car_model_id = 1),
+	(select car_type_id from car_type ct where car_type_id = 2),
+	'Granta');
+
+insert into car_model(car_brand_id, car_type_id, name) values(
+	(select car_model_id from car_model cm where car_model_id = 1),
+	(select car_type_id from car_type ct where car_type_id = 3),
+	'Vesta');
+
+insert into car_model(car_brand_id, car_type_id, name) values(
+	(select car_model_id from car_model cm where car_model_id = 2),
+	(select car_type_id from car_type ct where car_type_id = 2),
+	'Focus');
+
+insert into car_model(car_brand_id, car_type_id, name) values(
+	(select car_model_id from car_model cm where car_model_id = 2),
+	(select car_type_id from car_type ct where car_type_id = 2),
+	'Mustang');
+
+insert into car_model(car_brand_id, car_type_id, name) values(
+	(select car_model_id from car_model cm where car_model_id = 2),
+	(select car_type_id from car_type ct where car_type_id = 1),
+	'Otosan');
+
+
+'Заполнение таблицы rate'
+insert into rate(car_type_id, name, cost_per_hour, start_time, end_time) values(
+	(select car_type_id from car_type where car_type_id = 1),
+	'Грузовой тариф',
+	100,
+	'08:00:00',
+	'19:00:00');
+
+insert into rate(car_type_id, name, cost_per_hour, start_time, end_time) values(
+	(select car_type_id from car_type where car_type_id = 2),
+	'Базовый тариф',
+	40,
+	'08:00:00',
+	'19:00:00');
+
+insert into rate(car_type_id, name, cost_per_hour, start_time, end_time) values(
+	(select car_type_id from car_type where car_type_id = 3),
+	'Специальный тариф',
+	0,
+	'08:00:00',
+	'19:00:00');
+
+
+'Заполнение таблицы account'
+insert into account(account_number, balance) values(1001, 900);
+insert into account(account_number, balance) values(2002, 540);
+insert into account(account_number, balance) values(3003, 600);
+insert into account(account_number, balance) values(4004, 120);
+insert into account(account_number, balance) values(5005, 40);
+insert into account(account_number, balance) values(6006, 150);
+insert into account(account_number, balance) values(7007, 100);
+insert into account(account_number, balance) values(8008, 650);
+insert into account(account_number, balance) values(9009, 380);
+insert into account(account_number, balance) values(1010, 170);
+insert into account(account_number, balance) values(1111, 100);
+insert into account(account_number, balance) values(1212, 100);
+insert into account(account_number, balance) values(1313, 80);
+insert into account(account_number, balance) values(1414, 310);
+insert into account(account_number, balance) values(1515, 165);
+
+
+'Заполнение таблицы person'
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	'Игорь',
+	'Андреевич',
+	'Кононов',
+	'89005549880',
+	(select account_id from account where account_id = 1));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	'Владислав',
+	'Анатольевич',
+	'Толстопятов',
+	'89505349840',
+	(select account_id from account where account_id = 2));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	'Антонов',
+	'Андреевич',
+	'Андрей',
+	'89801549810',
+	(select account_id from account where account_id = 3));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	'Игорь',
+	'Иванович',
+	'Петров',
+	'89005549880',
+	(select account_id from account where account_id = 4));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	 'Мария',
+	 'Сергеевна',
+	 'Петрова',
+	 '89001234567',
+	 (select account_id from account where account_id = 5));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	 'Алексей',
+	 'Владимирович',
+	 'Иванов',
+	 '89007778888',
+	 (select account_id from account where account_id = 6));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	 'Елена',
+	 'Ивановна',
+	 'Смирнова',
+	 '89009998876',
+	 (select account_id from account where account_id = 7));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	 'Андрей',
+	 'Петрович',
+	 'Кузнецов',
+	 '89003456789',
+	 (select account_id from account where account_id = 8));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	 'Светлана',
+	 'Александровна',
+	 'Сидорова',
+	 '89002223344',
+	 (select account_id from account where account_id = 9));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	 'Дмитрий',
+	 'Олегович',
+	 'Павлов',
+	 '89005553433',
+	 (select account_id from account where account_id = 10));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	'Максим',
+	'Олегович',
+	'Лебедев',
+	'89001112233',
+	(select account_id from account where account_id = 11));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	'Екатерина',
+	'Сергеевна',
+	'Андреева',
+	'89003334455',
+	(select account_id from account where account_id = 12));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	'Павел',
+	'Анатольевич',
+	'Титов',
+	'89005551122',
+	(select account_id from account where account_id = 13));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	'Людмила',
+	'Ивановна',
+	'Морозова',
+	'89007773311',
+	(select account_id from account where account_id = 14));
+
+insert into person(first_name, patronymic_name, second_name, phone_number, account_id) values(
+	'Артем',
+	'Александрович',
+	'Романов',
+	'89008889900',
+	(select account_id from account where account_id = 15));
+
+
+'Заполнение таблицы car'
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 5),
+	(select person_id from person where person_id = 1),
+	'A777AA');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 1),
+	(select person_id from person where person_id = 2),
+	'P123PP');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 2),
+	(select person_id from person where person_id = 3),
+	'C123CD');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 3),
+	(select person_id from person where person_id = 4),
+	'D456DE');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 1),
+	(select person_id from person where person_id = 5),
+	'E789EF');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 4),
+	(select person_id from person where person_id = 6),
+	'F111FG');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 5),
+	(select person_id from person where person_id = 7),
+	'G222GG');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 4),
+	(select person_id from person where person_id = 8),
+	'H333HH');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 4),
+	(select person_id from person where person_id = 9),
+	'I444II');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 6),
+	(select person_id from person where person_id = 10),
+	'J555JJ');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 2),
+	(select person_id from person where person_id = 11),
+	'K666KK');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 2),
+	(select person_id from person where person_id = 12),
+	'L777LL');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 2),
+	(select person_id from person where person_id = 13),
+	'M888MM');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 3),
+	(select person_id from person where person_id = 14),
+	'N999NN');
+
+insert into car(car_model_id, person_id, car_number) values(
+	(select car_model_id from car_model where car_model_id = 6),
+	(select person_id from person where person_id = 15),
+	'O000OO');
+
+
+'Заполнение таблицы rent_place'
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 1),
+	(select parking_area_id from parking_area where parking_area_id = 1),
+	(select car_id from car where car_id = 1),
+	('2023-01-08 09:00:00'),
+	('2023-01-08 10:00:00'));
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 2),
+	(select car_id from car where car_id = 2),
+	'2023-01-09 10:45:00',
+	'2023-01-09 11:45:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 3),
+	(select parking_area_id from parking_area where parking_area_id = 3),
+	(select car_id from car where car_id = 3),
+	'2023-01-10 11:15:00',
+	'2023-01-10 12:15:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 1),
+	(select parking_area_id from parking_area where parking_area_id = 4),
+	(select car_id from car where car_id = 4),
+	'2023-01-11 12:20:00',
+	'2023-01-11 13:20:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 5),
+	(select car_id from car where car_id = 5),
+	'2023-01-12 13:50:00',
+	'2023-01-12 14:50:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 3),
+	(select parking_area_id from parking_area where parking_area_id = 6),
+	(select car_id from car where car_id = 6),
+	'2023-01-13 14:30:00',
+	'2023-01-13 15:30:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 1),
+	(select parking_area_id from parking_area where parking_area_id = 7),
+	(select car_id from car where car_id = 7),
+	'2023-01-14 15:10:00',
+	'2023-01-14 16:10:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 1),
+	(select car_id from car where car_id = 8),
+	'2023-01-15 16:40:00',
+	'2023-01-15 17:40:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 3),
+	(select parking_area_id from parking_area where parking_area_id = 2),
+	(select car_id from car where car_id = 9),
+	'2023-01-16 17:25:00',
+	'2023-01-16 18:25:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 1),
+	(select parking_area_id from parking_area where parking_area_id = 3),
+	(select car_id from car where car_id = 10),
+	'2023-01-17 18:05:00',
+	'2023-01-17 19:05:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 4),
+	(select car_id from car where car_id = 11),
+	'2023-01-18 19:35:00',
+	'2023-01-18 20:35:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 3),
+	(select parking_area_id from parking_area where parking_area_id = 5),
+	(select car_id from car where car_id = 12),
+	'2023-01-19 20:55:00',
+	'2023-01-19 21:55:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 1),
+	(select parking_area_id from parking_area where parking_area_id = 6),
+	(select car_id from car where car_id = 13),
+	'2023-01-20 21:45:00',
+	'2023-01-20 22:45:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 7),
+	(select car_id from car where car_id = 14),
+	'2023-01-21 22:15:00',
+	'2023-01-21 23:15:00');
+
+'1'
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 1),
+	(select parking_area_id from parking_area where parking_area_id = 3),
+	(select car_id from car where car_id = 10),
+	'2022-01-17 18:05:00',
+	'2022-01-17 19:05:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 4),
+	(select car_id from car where car_id = 11),
+	'2022-01-18 19:35:00',
+	'2022-01-18 20:35:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 3),
+	(select parking_area_id from parking_area where parking_area_id = 5),
+	(select car_id from car where car_id = 12),
+	'2021-01-19 20:55:00',
+	'2021-01-19 21:55:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 1),
+	(select parking_area_id from parking_area where parking_area_id = 6),
+	(select car_id from car where car_id = 13),
+	'2021-01-20 21:45:00',
+	'2021-01-20 22:45:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 7),
+	(select car_id from car where car_id = 14),
+	'2022-01-21 22:15:00',
+	'2022-01-21 23:15:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 7),
+	(select car_id from car where car_id = 14),
+	'2023-01-23 18:15:00',
+	'2023-01-23 23:15:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 7),
+	(select car_id from car where car_id = 2),
+	'2023-11-23 18:15:00',
+	'2023-11-23 23:15:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 7),
+	(select car_id from car where car_id = 2),
+	'2023-10-31 18:15:00',
+	'2023-10-31 23:15:00');
+
+insert into rent_place(rate_id, parking_area_id, car_id, start_date_and_time, end_date_and_time) values(
+	(select rate_id from rate where rate_id = 2),
+	(select parking_area_id from parking_area where parking_area_id = 7),
+	(select car_id from car where car_id = 15),
+	'2023-10-31 18:15:00',
+	'2023-10-31 23:15:00');
+

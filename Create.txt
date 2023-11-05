@@ -1,0 +1,136 @@
+CREATE TABLE region (
+	region_id serial4 NOT NULL,
+	"name" varchar(60) UNIQUE,
+	CONSTRAINT region_pkey PRIMARY KEY (region_id)
+);
+
+CREATE TABLE city (
+	city_id serial4 NOT NULL,
+	region_id int4,
+	"name" varchar(30),
+	CONSTRAINT city_pkey PRIMARY KEY (city_id),
+	CONSTRAINT fk_region FOREIGN KEY (region_id) REFERENCES region(region_id)
+);
+
+CREATE TABLE parking_area (
+	parking_area_id serial4 NOT NULL,
+	city_id int4,
+	code int4 UNIQUE,
+	capacity int4 CHECK(capacity > 0),
+	CONSTRAINT parking_area_pkey PRIMARY KEY (parking_area_id),
+	CONSTRAINT fk_city FOREIGN KEY (city_id) REFERENCES city(city_id)
+);
+
+CREATE TABLE car_brand (
+	car_brand_id serial4 NOT NULL,
+	"name" varchar(30) UNIQUE,
+	CONSTRAINT car_brand_pkey PRIMARY KEY (car_brand_id)
+);
+
+CREATE TABLE car_type (
+	car_type_id serial4 NOT NULL,
+	"name" varchar(30) UNIQUE,
+	CONSTRAINT car_type_pkey PRIMARY KEY (car_type_id)
+);
+
+CREATE TABLE car_model (
+	car_model_id serial4 NOT NULL,
+	car_type_id int4,
+	car_brand_id int4,
+	"name" varchar(30),
+	CONSTRAINT car_model_pkey PRIMARY KEY (car_model_id),
+	CONSTRAINT fk_car_brand FOREIGN KEY (car_brand_id) REFERENCES car_brand(car_brand_id),
+	CONSTRAINT fk_car_type FOREIGN KEY (car_type_id) REFERENCES car_type(car_type_id)
+);
+
+CREATE TABLE rate (
+	rate_id serial4 NOT NULL,
+	car_type_id int4,
+	"name" varchar(30),
+	cost_per_hour money DEFAULT 50,
+	start_time time,
+	end_time time,
+	CONSTRAINT rate_pkey PRIMARY KEY (rate_id),
+	CONSTRAINT fk_car_type FOREIGN KEY (car_type_id) REFERENCES car_type(car_type_id)
+);
+
+CREATE TABLE account (
+	account_id serial4 NOT NULL,
+	account_number varchar(30) UNIQUE,
+	balance money,
+	CONSTRAINT account_pkey PRIMARY KEY (account_id)
+);
+
+CREATE TABLE person (
+	person_id serial4 NOT NULL,
+	first_name varchar(30),
+	second_name varchar(30),
+	phone_number varchar(20) UNIQUE,
+	account_id int4,
+	CONSTRAINT person_pkey PRIMARY KEY (person_id),
+	CONSTRAINT fk_account FOREIGN KEY (account_id) REFERENCES account(account_id)
+);
+
+CREATE TABLE car (
+	car_id serial4 NOT NULL,
+	car_model_id int4,
+	person_id int4,
+	car_number varchar(30) UNIQUE,
+	CONSTRAINT car_pkey PRIMARY KEY (car_id),
+	CONSTRAINT fk_car_model FOREIGN KEY (car_model_id) REFERENCES car_model(car_model_id),
+	CONSTRAINT fk_person FOREIGN KEY (person_id) REFERENCES person(person_id)
+);
+
+CREATE TABLE rent_place (
+	rent_place_id serial4 NOT NULL,
+	rate_id int4,
+	parking_area_id int4,
+	car_id int4,
+	start_date_time timestamp,
+	end_date_time timestamp CHECK(end_date_time > start_date_time),
+	CONSTRAINT rent_place_pkey PRIMARY KEY (rent_place_id),
+	CONSTRAINT fk_car FOREIGN KEY (car_id) REFERENCES car(car_id),
+	CONSTRAINT fk_parking_area FOREIGN KEY (parking_area_id) REFERENCES parking_area(parking_area_id),
+	CONSTRAINT fk_rate FOREIGN KEY (rate_id) REFERENCES rate(rate_id)
+);
+
+CREATE TABLE payment_for_rent (
+	payment_for_rent_id serial4 NOT NULL,
+	account_id int4,
+	rent_place_id int4,
+	transaction_date_time timestamp,
+	amount money,
+	CONSTRAINT payment_for_rent_pkey PRIMARY KEY (payment_for_rent_id),
+	CONSTRAINT fk_account FOREIGN KEY (account_id) REFERENCES account(account_id),
+	CONSTRAINT fk_renf_place_id FOREIGN KEY (rent_place_id) REFERENCES rent_place(rent_place_id)
+);
+
+CREATE TABLE fine (
+	fine_id serial4 NOT NULL,
+	amount int4,
+	rent_place_id int4,
+	commentary varchar(200),
+	violation_date_time timestamp,
+	CONSTRAINT fine_pkey PRIMARY KEY (fine_id),
+	CONSTRAINT fk_rent_place FOREIGN KEY (rent_place_id) REFERENCES rent_place(rent_place_id)
+);
+
+CREATE TABLE payment_for_fine (
+	payment_for_fine_id serial4 NOT NULL,
+	account_id int4,
+	fine_id int4,
+	transaction_date_time timestamp,
+	amount money,
+	CONSTRAINT payment_for_fine_pkey PRIMARY KEY (payment_for_fine_id),
+	CONSTRAINT fk_account FOREIGN KEY (account_id) REFERENCES account(account_id),
+	CONSTRAINT fk_fine FOREIGN KEY (fine_id) REFERENCES fine(fine_id)
+);
+
+CREATE TABLE receipt_to_account (
+	receipt_to_account_id serial4 NOT NULL,
+	account_id int4,
+	transaction_date_time timestamp,
+	amount money,
+	CONSTRAINT receipt_to_account_pkey PRIMARY KEY (receipt_to_account_id),
+	CONSTRAINT fk_account FOREIGN KEY (account_id) REFERENCES account(account_id)
+);
