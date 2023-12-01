@@ -1,9 +1,9 @@
 '1. Выбрать все данные о зонах парковки. Результат отсортировать по
 названию парковки в лексикографическом порядке.'
 
-SELECT * 
+SELECT *
 FROM parking_area
-ORDER BY name;
+ORDER BYname;
 
 
 '2. Выбрать все года въезда автомобилей на парковку без повторений.
@@ -11,7 +11,7 @@ ORDER BY name;
 
 SELECT DISTINCT EXTRACT(YEAR FROM start_date_and_time) AS YEAR
 FROM rent_place
-ORDER BY YEAR DESC;
+ORDER BYYEAR DESC;
 
 
 '3. Выбрать название, код, вместимость зон парковки. Результат
@@ -20,7 +20,7 @@ ORDER BY YEAR DESC;
 
 SELECT name, code, capacity
 FROM parking_area
-ORDER BY capacity DESC, code ASC;
+ORDER BYcapacity DESC, code ASC;
 
 
 '4. Выбрать все данные о въездах и выездах, совершенных вчера с 12 до 18
@@ -29,45 +29,68 @@ ORDER BY capacity DESC, code ASC;
 SELECT *
 FROM rent_place
 WHERE (EXTRACT(HOUR FROM start_date_and_time) >= 12
-   AND EXTRACT(HOUR FROM start_date_and_time) <= 18)
-   OR (EXTRACT(HOUR FROM end_date_and_time) >= 12
-   AND EXTRACT(HOUR FROM end_date_and_time) <= 18)
-ORDER BY end_date_and_time DESC;
+AND EXTRACT(HOUR FROM start_date_and_time) <= 18)
+OR (EXTRACT(HOUR FROM end_date_and_time) >= 12
+AND EXTRACT(HOUR FROM end_date_and_time) <= 18)
+ORDER BYend_date_and_time DESC;
 
 
 '5. Выбрать названия типов транспортных средств, которые состоят из двух
 или трех слов, но не включают "ов".'
+--сделать с Like
+SELECT name
+FROM (SELECT trim(name) AS name FROM car_type) AS ct
+WHERE
+(length(name) - length(replace(name, ' ', '')) = 1
+OR length(name) - length(replace(name, ' ', '')) = 2)
+AND (name NOT LIKE '%ов%');
+
+--------------—
 
 SELECT name
 FROM (SELECT trim(name) AS name FROM car_type) AS ct
-WHERE 
-	(length(name) - length(replace(name, ' ', '')) = 1
-	OR length(name) - length(replace(name, ' ', '')) = 2)
-	AND (name NOT LIKE '%ов%');
-	
+WHERE (name LIKE '% %' OR name LIKE '% % %')
+AND name NOT LIKE '%ов%';
+
 
 '6. Выбрать даты въезда и выезда автомобилей (без повторений) с id 5, 2, 12,
 3,12, 13. Результат отсортировать следующим образом: в первую очередь
 автомобили с зоны парковки с id = 2, затем с зоны парковки с id = 5, после
 с зоны парковки с id = 3, затем все остальные, и по id транспортного
 средства в возрастающем порядке.'
+--переделать без cte
+WITH selected_data AS
+(SELECT DISTINCT start_date_and_time, end_date_and_time, parking_area_id, car_id
+FROM rent_place
+WHERE car_id IN (5, 2, 12, 3, 12, 13))
 
-WITH SELECTed_data AS 
-	(SELECT DISTINCT start_date_and_time, end_date_and_time, parking_area_id, car_id 
-	FROM rent_place
-	WHERE car_id IN (5, 2, 12, 3, 12, 13))
 
-	
 SELECT start_date_and_time, end_date_and_time, car_id
-FROM SELECTed_data
+FROM selected_data
 ORDER BY
-	CASE 
-		WHEN parking_area_id = 2 THEN 1
-		WHEN parking_area_id = 5 THEN 2
-		WHEN parking_area_id = 3 THEN 3
-		ELSE 4
-	END, car_id ASC
+CASE
+WHEN parking_area_id = 2 THEN 1
+WHEN parking_area_id = 5 THEN 2
+WHEN parking_area_id = 3 THEN 3
+ELSE 4
+END, car_id ASC
 
+--------------------—
+SELECT distinct rp2.start_date_and_time, rp2.end_date_and_time, rp2.parking_area_id, rp2.car_id
+FROM rent_place rp2
+WHERE rp2.car_id in (5, 2, 12, 3, 12, 13)) as rp
+
+
+SELECT rp.parking_area_id, rp.car_id , rp.start_date_and_time, rp.end_date_and_time
+FROM rent_place rp
+where rp.car_id in (5, 2, 12, 3, 12, 13)
+ORDER BY
+CASE
+WHEN rp.parking_area_id = 2 THEN 1
+WHEN rp.parking_area_id = 5 THEN 2
+WHEN rp.parking_area_id = 3 THEN 3
+ELSE 4
+END, rp.car_id ASC
 
 '7. Выбрать зоны парковки, в названии которых нет символов /, _ , -, но есть
 одна из следующих букв A, B, C.'
@@ -75,9 +98,9 @@ ORDER BY
 SELECT name
 FROM parking_area
 WHERE name NOT LIKE '%\_%' ESCAPE '\'
-  AND name NOT LIKE '%/%'
-  AND name NOT LIKE'%-%'
-  AND (upper(name) LIKE '%А%' OR name LIKE '%В%' OR name LIKE '%С%');
+AND name NOT LIKE '%/%'
+AND name NOT LIKE'%-%'
+AND (upper(name) LIKE '%А%' OR (upper(name) LIKE '%В%' OR (upper(name) LIKE '%С%');
 
 
 '8. Выбрать все данные тарифов, в последнем столбце указать сообщение
@@ -88,12 +111,12 @@ WHERE name NOT LIKE '%\_%' ESCAPE '\'
 
 SELECT *,
 CASE
-    WHEN EXTRACT(YEAR FROM start_date) = EXTRACT(YEAR FROM current_date) THEN cast(cost_per_HOUR AS varchar(30))
-    WHEN EXTRACT(YEAR FROM start_date) = EXTRACT(YEAR FROM current_date) - 1 THEN 'Прошлый год'
-    ELSE 'Устарел'
+WHEN EXTRACT(YEAR FROM start_date) = EXTRACT(YEAR FROM current_date) THEN cast(cost_per_HOUR AS varchar(30))
+WHEN EXTRACT(YEAR FROM start_date) = EXTRACT(YEAR FROM current_date) - 1 THEN 'Прошлый год'
+ELSE 'Устарел'
 END AS info
 FROM rate
-ORDER BY cost_per_HOUR DESC;
+ORDER by cost_per_HOUR DESC;
 
 
 '9. Выбрать год и название месяца в одном столбце для выездов
@@ -105,27 +128,40 @@ WHERE car_id % 2 = 0;
 
 
 '10.Выбрать типы транспортных средств, для которых не указано описание.
-Результат отсортировать следующим образом: в первую очередь те типы
+Результат отсортировать следующим образом: в первую
+очередь те типы
 транспортных средств, названия которых состоят из одного слова, во
 вторую очередь состоящие из двух слов, затем все остальные.'
+--like
+SELECT name
+FROM car_type
+WHERE description IS NULL OR description = ''
+ORDER BY
+CASE
+WHEN LENGTH(name) - LENGTH(REPLACE(name, ' ', '')) = 0 THEN 1
+WHEN LENGTH(name) - LENGTH(REPLACE(name, ' ', '')) = 1 THEN 2
+ELSE 3
+END, name
+
+------------------—
 
 SELECT name
 FROM car_type
 WHERE description IS NULL OR description = ''
-ORDER BY 
-	CASE 
-	    WHEN LENGTH(name) - LENGTH(REPLACE(name, ' ', '')) = 0 THEN 1
-	    WHEN LENGTH(name) - LENGTH(REPLACE(name, ' ', '')) = 1 THEN 2
-		ELSE 3
-	END, name
-	
+ORDER BY
+CASE
+WHEN (name LIKE '%%' AND name NOT LIKE '% %') THEN 1
+WHEN (name LIKE '% %' AND name NOT LIKE '% % %') THEN 2
+ELSE 3
+END, name
+
 
 '11.Выбрать дату открытия парковки.'
-	
-select min(rp.start_date_and_time) as open_time 
-from rent_place rp
-group by rp.parking_area_id 
-	
+
+SELECT min(rp.start_date_and_time) as open_time
+FROM rent_place rp
+GROUP BYrp.parking_area_id
+
 
 '12.Выбрать среднее время пребывания автомобилей на парковке.'
 
@@ -142,10 +178,10 @@ FROM parking_area
 '14.Выбрать количество различных транспортных средств, бывших на
 парковке в текущем месяце.'
 
-SELECT count(car_id) 
+SELECT count(car_id)
 FROM rent_place
 WHERE EXTRACT(YEAR FROM start_date_and_time) = EXTRACT(YEAR FROM current_date)
-  AND EXTRACT(MONTH FROM start_date_and_time) = EXTRACT(MONTH FROM current_date)
+AND EXTRACT(MONTH FROM start_date_and_time) = EXTRACT(MONTH FROM current_date)
 
 
 '15.Выбрать суммарное время пребывания автомобиля с id = 2 на стоянке за
@@ -154,19 +190,21 @@ WHERE EXTRACT(YEAR FROM start_date_and_time) = EXTRACT(YEAR FROM current_date)
 SELECT sum(end_date_and_time - start_date_and_time) AS time
 FROM rent_place
 WHERE car_id = 2
- 
- 
+AND start_date_and_time >= date_trunc('year', current_date)
+
+----------------------—
+
 SELECT SUM(EXTRACT(EPOCH FROM (end_date_and_time - start_date_and_time))) / 3600 as time
-FROM rent_place 
-WHERE car_id = 2 
-  AND start_date_and_time >= date_trunc('year', current_date) 
+FROM rent_place
+WHERE car_id = 2
+AND start_date_and_time >= date_trunc('year', current_date)
 
 
 '16.Выбрать название типа и номер транспортного средства. Результат
 отсортировать по названию типа в порядке обратном
 лексикографическому и по номеру'
 
-SELECT c.car_number, ct."name" 
+SELECT c.car_number, ct."name"
 FROM car c
 LEFT JOIN car_model cm ON c.car_model_id = cm.car_model_id
 LEFT JOIN car_type ct ON cm.car_type_id = ct.car_type_id
@@ -175,36 +213,38 @@ ORDER BY ct."name" DESC, c.car_number
 
 '17.Выбрать номера транспортных средств, которые выезжали с парковки
 вчера.'
-SELECT c.car_number 
-FROM rent_place rp 
+
+SELECT c.car_number
+FROM rent_place rp
 LEFT JOIN car c ON c.car_id = rp.car_id
-WHERE rp.end_date_and_time between 
-	(current_date - interval '1 day')::timestamp
-	AND 
-	(current_date - interval '1 second')::timestamp
+WHERE rp.end_date_and_time between
+(current_date - interval '1 day')::timestamp
+AND
+(current_date - interval '1 second')::timestamp
 
+-------------------------—
 
-SELECT c.car_number as car
-FROM rent_place rp 
-left join car c on c.car_id = rp.car_id
-WHERE start_date_and_time >= date_trunc('day', current_date) - interval '1 day' 
-  AND start_date_and_time < date_trunc('day', current_date)	
+SELECT c.car_number
+FROM rent_place rp
+LEFT JOIN car c on c.car_id = rp.car_id
+WHERE start_date_and_time >= date_trunc('day', current_date) - interval '1 day'
+AND start_date_and_time < date_trunc('day', current_date)
 
 
 '18.Выбрать номер транспортного средства, название типа транспортного
 средства, дату въезда на парковку, время въезда на парковку, дату выезда,
 время выезда, название и код зоны парковки, стоимость часа парковки.'
-	
+
 SELECT
-	c.car_number,
-	ct."name",
-	to_char(rp.start_date_and_time, 'YYYY MONTH') AS start_date,
-	to_char(rp.start_date_and_time, 'HH24:MI:SS') AS start_time,
-	to_char(rp.end_date_and_time, 'YYYY MONTH') AS end_date,
-	to_char(rp.end_date_and_time, 'HH24:MI:SS') AS end_time,
-	pa."name",
-	pa.capacity,
-	r.cost_per_hour 
+c.car_number,
+ct."name",
+to_char(rp.start_date_and_time, 'YYYY MONTH') AS start_date,
+to_char(rp.start_date_and_time, 'HH24:MI:SS') AS start_time,
+to_char(rp.end_date_and_time, 'YYYY MONTH') AS end_date,
+to_char(rp.end_date_and_time, 'HH24:MI:SS') AS end_time,
+pa."name",
+pa.capacity,
+r.cost_per_hour
 FROM car c
 LEFT JOIN car_model cm ON c.car_model_id = cm.car_model_id
 LEFT JOIN car_type ct ON cm.car_type_id = ct.car_type_id
@@ -215,130 +255,313 @@ LEFT JOIN rate r ON rp.rate_id = r.rate_id
 
 '19.Выбрать номера транспортных средств, которые оставались в зоне
 парковки N (конкретное значение подставьте сами) на ночь.'
-
-SELECT c.car_number, c.car_id 
+----—-------------------------------------------------------------------------------------
+SELECT c.car_number
 FROM rent_place rp
-LEFT JOIN car c ON c.car_id = rp.car_id 
+LEFT JOIN car c ON c.car_id = rp.car_id
 WHERE rp.parking_area_id = 3
-  AND EXTRACT(HOUR FROM rp.start_date_and_time) >= 21
-  AND (EXTRACT(HOUR FROM rp.end_date_and_time) <= 6
-  OR EXTRACT(HOUR FROM rp.end_date_and_time) > 6)
+AND EXTRACT(HOUR FROM rp.start_date_and_time) >= 21
+AND (EXTRACT(HOUR FROM rp.end_date_and_time) <= 6
+OR EXTRACT(HOUR FROM rp.end_date_and_time) > 6)
 
-SELECT c.car_number, c.car_id 
-FROM rent_place rp 
-LEFT JOIN car c ON c.car_id = rp.car_id 
-WHERE rp.parking_area_id = 3 
+—----------------------—
+
+SELECT c.car_number, c.car_id
+FROM rent_place rp
+LEFT JOIN car c ON c.car_id = rp.car_id
+WHERE rp.parking_area_id = 3
   AND rp.start_date_and_time <= date_trunc('day', current_date)
   AND rp.end_date_and_time >= date_trunc('day', current_date) + interval '1 day'
 
 
-select c.car_number, c.car_id 
-from rent_place rp
-left join car c on c.car_id = rp.car_id 
-where rp.parking_area_id = 3
-  and start_date_and_time <= date_trunc('day', current_date)
-  AND end_date_and_time >= date_trunc('day', current_date) + interval '1 day'
-  
-  
-SELECT car_id
-FROM rent_place
-WHERE start_date_and_time <= date_trunc('day', current_date)
-  AND end_date_and_time >= date_trunc('day', current_date) + interval '1 day'
-  AND parking_zone = 'N'
+SELECT c.car_number, c.car_id
+FROM car c
+LEFT JOIN rent_place rp ON c.car_id = rp.car_id
+                      where rp.parking_area_id = 3
+                      AND rp.start_date_and_time <= date_trunc('day', current_date)
+                      AND rp.end_date_and_time >= current_date + interval '1 day'
 
 
+ 
 '20.Выбрать название и код зоны парковки, количество парковавшихся
 транспортных средств.'
 
-SELECT 
-	pa."name",
-	pa.code,
-	count(rp.car_id) AS parked_count
-FROM parking_area pa 
-LEFT JOIN rent_place rp ON pa.parking_area_id = rp.parking_area_id 
-GROUP BY pa.code, pa."name", pa.parking_area_id 
-ORDER BY pa.code 
+SELECT
+pa."name",
+pa.code,
+count(rp.car_id) AS parked_count
+FROM parking_area pa
+LEFT JOIN rent_place rp ON pa.parking_area_id = rp.parking_area_id
+GROUP BY pa.code, pa."name", pa.parking_area_id
+ORDER BY pa.code
 
 
 '21.Выбрать все данные о зонах парковки и количество парковавшихся
 автомобилей в каждой зоне в текущем году. В результат включить только
 парковки вместимостью больше N (значение подставьте сами).'
 
-SELECT pa.*, count(rp.car_id) 
+SELECT pa.*, count(rp.car_id)
 FROM parking_area pa
-left join rent_place rp on rp.parking_area_id = pa.parking_area_id 
+LEFT JOIN rent_place rp on rp.parking_area_id = pa.parking_area_id
 WHERE EXTRACT(YEAR FROM rp.start_date_and_time) = EXTRACT(YEAR FROM current_date)
-  AND pa.capacity > 10
-GROUP BY pa.parking_area_id 
+AND pa.capacity > 10
+GROUP BY pa.parking_area_id, pa.capacity, pa.city_id, pa.code, pa."name"
 
 
 '22.Выбрать номер транспортного средства, которое въезжало на парковку
 более трех раз.'
 
-SELECT c.car_number
-FROM car c
-WHERE (SELECT count(rp.car_id) > 3 FROM rent_place rp);
+SELECT c.car_number, c.car_id
+FROM rent_place rp
+LEFT JOIN car c ON c.car_id = rp.car_id
+GROUP BY c.car_number, c.car_id
+HAVING COUNT(*) > 3
 
 
 '23.Выбрать номер транспортного средства, которое въезжало на парковку
 несколько раз за один день.'
 
-select c.car_number
-from rent_place rp 
-left join car c on rp.car_id = c.car_id
-group by c.car_number, to_char(rp.start_date_and_time, 'YYYY-MONTH-DD')
-having count(rp.start_date_and_time) > 1 
+SELECT c.car_number, c.car_id, rp.start_date_and_time::date
+FROM rent_place rp
+LEFT JOIN car c ON c.car_id = rp.car_id
+GROUP BY c.car_number, c.car_id, rp.start_date_and_time::date
+HAVING COUNT(*) > 1
 
 
 '24.Выбрать номер транспортного средства, которое въезжало на парковку
 несколько раз за один день, но всегда в одну и ту же зону парковки.
 Результат отсортировать по убыванию.'
 
-select car_number, count(parking_area_id), dt, cnt
-from (
-	select c.car_number, to_char(rp.start_date_and_time, 'YYYY-MONTH-DD') as dt, rp.parking_area_id, count(*) as cnt
-	from rent_place rp 
-	left join car c on rp.car_id = c.car_id
-	group by c.car_number, to_char(rp.start_date_and_time, 'YYYY-MONTH-DD'), rp.parking_area_id 
-) data
-group by 
-	car_number, dt, cnt
---having count(to_char(rp.start_date_and_time, 'YYYY-MONTH-DD')) > 1 
---   and count(parking_area_id) = count(rp.start_date_and_time)
-order by car_number desc 
+SELECT c.car_number, c.car_id, rp.start_date_and_time::date
+FROM rent_place rp
+LEFT JOIN car c ON c.car_id = rp.car_id
+WHERE rp.parking_area_id = 3
+GROUP BY c.car_number, c.car_id, rp.start_date_and_time::date
+HAVING COUNT(*) > 1
+ORDER BY COUNT(*) DESC
 
 
 '25.Выбрать все данные типа, транспортные средства которого въезжали на
 парковку в текущем месяце более трех раз. '
 
-SELECT ct.*
-FROM car_type ct 
-LEFT JOIN car_model cm ON cm.car_type_id = ct.car_type_id 
-LEFT JOIN car c ON c.car_model_id = cm.car_model_id 
+select ct.*
+from car_type ct 
+LEFT JOIN car_model cm ON cm.car_type_id = ct.car_type_id
+LEFT JOIN car c ON c.car_model_id = cm.car_model_id
 LEFT JOIN rent_place rp ON c.car_id = rp.car_id
-WHERE (SELECT count(rp.car_id) > 3 FROM rent_place rp)
-  AND EXTRACT(MONTH FROM rp.start_date_and_time) = EXTRACT(MONTH FROM current_date)
+WHERE EXTRACT(MONTH FROM rp.start_date_and_time) = EXTRACT(MONTH FROM CURRENT_DATE) 
+  AND EXTRACT(YEAR FROM rp.start_date_and_time) = EXTRACT(YEAR FROM CURRENT_DATE)
+GROUP BY c.car_number, c.car_id, ct.car_type_id, ct."name", ct.description
+HAVING COUNT(*) > 3
 
-  
+
 '26.Выбрать зону парковки вместимостью больше N и дату(ы) текущего
 месяца, когда в зоне парковки побывало ТС в два раза больше, чем
 вместимость парковочной зоны. Результат отсортировать по дате.'
-  
 
-  
-  
+SELECT pa.parking_area_id, pa.capacity, rp.start_date_and_time
+FROM parking_area pa
+LEFT JOIN rent_place rp ON pa.parking_area_id = rp.parking_area_id
+WHERE pa.capacity > 5
+AND EXTRACT(MONTH FROM rp.start_date_and_time) = EXTRACT(MONTH FROM CURRENT_DATE)
+AND EXTRACT(YEAR FROM rp.start_date_and_time) = EXTRACT(YEAR FROM CURRENT_DATE)
+GROUP BY pa.parking_area_id, pa.capacity, rp.start_date_and_time
+HAVING COUNT(rp.car_id) > 2 * pa.capacity
+ORDER BY rp.start_date_and_time;
+
+
 '27.Выбрать все типы транспортных средств, и если есть тариф на
 соответствующий тип, то выбрать стоимость и дату вступления в силу.'
-  
-  
+
+SELECT ct."name", r.start_date 
+FROM car_type ct
+left join rate r on r.car_type_id = ct.car_type_id 
+
+
 '28.Выбрать все номера транспортных средств, и если транспортное средство
 парковалось в текущем месяце, то дату и время въезда и выезда.'
 
-  
+SELECT c.car_number, rp.start_date_and_time, rp.end_date_and_time
+FROM car c
+LEFT JOIN rent_place rp ON c.car_id = rp.car_id
+WHERE EXTRACT(MONTH FROM rp.start_date_and_time) = EXTRACT(MONTH FROM CURRENT_DATE)
+  AND EXTRACT(YEAR FROM rp.start_date_and_time) = EXTRACT(YEAR FROM CURRENT_DATE);
+
+
 '29.Выбрать пары названий типов транспортных средств, которые имеют
 одинаковые тарифы.'
-  
-  
+
+select ct."name", r."name" 
+from car_type ct 
+join rate r on ct.name = r.name 
+
+
 '30.Выбрать для каждой зоны парковки все виды транспортных средств.
 Результат отсортировать по названию вида и коду зоны парковки'
+
+SELECT ct."name", pa.parking_area_id, pa.code 
+FROM parking_area pa 
+LEFT JOIN rent_place rp ON rp.parking_area_id = pa.parking_area_id 
+LEFT JOIN rate r ON r.rate_id = rp.rate_id 
+LEFT JOIN car_type ct ON ct.car_type_id = r.car_type_id 
+ORDER BY ct."name", pa.code
+
+
+'31.Выбрать для каждой зоны парковки все виды транспортных средств, и
+если транспортные средства соответствующего вида парковались в зоне
+парковки, то вывести количество таких ТС.'
+
+
+
+
+'32.Выбрать зоны парковки, названия которых совпадают с названием типа
+ТС.'
+
+select pa."name" AS pa_name, ct."name" AS ct_name 
+from parking_area pa 
+JOIN car_type ct ON ct."name" = pa."name" 
+
+'33.Выбрать пары номеров и названий типов ТС, которые парковались в один
+и тот же день с разницей в 5 минут в одной и той же зоне парковки.'
+
+SELECT c1.car_number AS car_1, ct1."name" AS car_type_1, c2.car_number AS car_2, ct2."name" AS car_type_2, rp1.start_date_and_time AS car_1_start, rp2.start_date_and_time AS car_2_start
+FROM rent_place rp1
+JOIN car c1 ON c1.car_id = rp1.car_id 
+JOIN car_model cm ON cm.car_model_id = c1.car_model_id 
+JOIN car_type ct1 ON ct1.car_type_id = cm.car_type_id
+JOIN rent_place rp2 ON rp1.car_id <> rp2.car_id 
+                    AND rp1.parking_area_id = rp2.parking_area_id
+                    AND ABS(EXTRACT(EPOCH FROM rp1.start_date_and_time - rp2.start_date_and_time) / 60) <= 5            
+JOIN car c2 ON c2.car_id = rp2.car_id 
+JOIN car_model cm2 ON cm2.car_model_id = c2.car_model_id 
+JOIN car_type ct2 ON ct2.car_type_id = cm2.car_type_id
+WHERE ct1.car_type_id <> ct2.car_type_id
+                    
+'34.Выбрать номера легковых транспортных средств, которые въезжали на
+парковку 24 дня за один месяц.'
+
+SELECT c.car_number 
+FROM rent_place rp 
+JOIN car c ON c.car_id = rp.car_id 
+JOIN car_model cm ON cm.car_model_id = c.car_model_id 
+JOIN car_type ct ON ct.car_type_id = cm.car_type_id 
+				AND (SELECT ct2."name" FROM car_type ct2 WHERE ct2.name = 'Легковой автомобиль')
+
+
+'35.Выбрать все данные зон парковки, на которых одновременно парковалось
+два различных вида транспортных средства.'
+
+select rp.*
+from rent_place rp
+left join car c on c.car_id = rp.car_id 
+left join car_model cm on cm.car_model_id = c.car_model_id 
+left join car_type ct on ct.car_type_id = cm.car_type_id 
+
+
+--36.Выбрать зону парковки с максимальной вместимостью.
+
+select pa.*
+from parking_area pa
+order by pa.capacity desc 
+limit 1
+
+select pa.*
+from parking_area pa 
+where (pa.capacity = (select max(capacity) from parking_area))
+
+
+--37.Выбрать зоны парковки с максимальной и минимальной вместимостью
+
+select pa.*
+from parking_area pa 
+where (pa.capacity = (select max(capacity) from parking_area))
+   or (pa.capacity = (select min(capacity) from parking_area))
+
+
+--38.Выбрать типы транспортных средств для которых не указан тариф.
+
+SELECT ct.*
+FROM car_type ct 
+LEFT JOIN rate r ON r.car_type_id = ct.car_type_id 
+WHERE r.car_type_id IS NULL 
+
+--39.Выбрать транспортное средство, которое побывало на всех зонах парковки.
+
+SELECT car_id
+FROM (
+ SELECT car_id, COUNT(DISTINCT parking_area_id) AS unique_areas
+ FROM rent_place
+ GROUP BY car_id
+	 ) AS subquery
+WHERE unique_areas = (SELECT COUNT(DISTINCT parking_area_id) FROM rent_place);
+
+
+--40.Для каждого типа транспортного средства выбрать тариф действительный на сегодняшний день.
+
+SELECT ct.*
+FROM car_type ct 
+JOIN rate r ON r.car_type_id = ct.car_type_id 
+WHERE current_date > r.start_date 
+
+--41.Для каждого типа транспортного средства выбрать тарифы, действующие на 21 марта 2018 года.
+
+--42.Выбрать транспортные средства, парковавшиеся на парковках, на которых парковалось более 5 ТС
+
+--43.Выбрать номер ТС, которое въезжает на парковку чаще других.
+
+--44.Для каждой парковочной зоны выбрать название типа, транспортные средства которого паркуются чаще других.
+
+--45.Выбрать зону парковки, на которую въехало наибольшее количество
+--транспортных средств за текущий год
+
+--46.Выбрать код и название парковочной зоны, на которой за вчерашний день
+--въехало ТС больше, чем на парковочную зону с максимальной вместимостью
+
+--47.Выбрать номер ТС, которое суммарно дольше других находилось на парковке.
+
+--48.Выбрать номера транспортных средств, которые не въезжали на парковку больше года.
+
+--49.Выбрать все даты, имеющиеся в базе, в одном столбце. Результат
+--отсортировать по дате в убывающем порядке.
+
+--50.Выбрать те типы транспортных средств, которые всегда паркуются
+--только в одной зоне парковки в течении последних двух лет.
+
+--51. Выбрать номер, название типа транспортного средства, дату и время
+--въезда, дату и время выезда, код зоны парковки, стоимость часа парковки
+--и сумму к оплате. Расчет произвести по тарифу, действующему на момент
+--въезда ТС на парковку.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
